@@ -56,13 +56,13 @@ namespace Ecom.API.Middleware
                 return (timesTamp: dateNow, count: 0);
             });
 
-            if(dateNow - timesTamp > _rateLimitwindow)
+            if(dateNow - timesTamp < _rateLimitwindow)
             {
                 if(count >=8)
                 {
                     return false;
                 }
-                _memoryCache.Set(cachKey, (timesTamp, count + 1), _rateLimitwindow);
+                _memoryCache.Set(cachKey, (timesTamp, count += 1), _rateLimitwindow);
             }
             else
             {
