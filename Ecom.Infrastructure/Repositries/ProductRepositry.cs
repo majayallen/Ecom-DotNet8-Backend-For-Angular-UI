@@ -4,6 +4,7 @@ using Ecom.Core.Entites.Product;
 using Ecom.Core.Interfaces;
 using Ecom.Core.Services;
 using Ecom.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,6 +42,39 @@ namespace Ecom.Infrastructure.Repositries
             await _db.AddRangeAsync(photo);
             await _db.SaveChangesAsync();
             return true;
+        }
+        public async Task<bool> UpdateAsync(UpdateProductDTO updateProductDTO)
+        {
+           if (updateProductDTO == null) return false;
+           var FindProduct = await _db.Products.Include(x=>x.Category).Include(x=>x.Photos).FirstOrDefaultAsync(m=>m.Id==updateProductDTO.Id);
+            if (FindProduct == null) return false;
+            _mapper.Map(updateProductDTO,FindProduct);
+            var findPhoto = await _db.Photos.Where(x => x.ProductId == updateProductDTO.Id).ToListAsync();
+            foreach(var photos in findPhoto)
+            {
+                _imageManagementService.DeleteImageAsync(photos.ImageName);
+            }
+             _db.Photos.RemoveRange(findPhoto);
+            var ImagePath = await _imageManagementService.AddImageAsync(updateProductDTO.Photo, updateProductDTO.Name);
+            var photo = ImagePath.Select(Path => new Photo
+            {
+
+                ImageName = Path,
+                ProductId = updateProductDTO.Id,
+            }).ToList();
+            await _db.AddRangeAsync(photo);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+        public async Task DeleteAsync(Product product)
+        {
+            var photo = await _db.Photos.Where(x=>x.ProductId == product.Id).ToListAsync();
+            foreach (var item in photo) { 
+               
+                _imageManagementService.DeleteImageAsync(item.ImageName);
+            }
+             _db.Products.Remove(product);
+            await _db.SaveChangesAsync();
         }
     }
 }

@@ -63,5 +63,36 @@ namespace Ecom.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpPut("update-product")]
+        public async Task<IActionResult> Update(UpdateProductDTO productDTO)
+        {
+            try
+            {
+                if (productDTO is null)
+                    return BadRequest(new ResponseAPI(400));
+                await _unitOfWork.ProductRepositry.UpdateAsync(productDTO);
+                return Ok(new ResponseAPI(200, "Item has been Updated"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpDelete("delete-product/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                if (id < 0)
+                    return BadRequest(new ResponseAPI(400));
+                var product = await _unitOfWork.ProductRepositry.GetByIdAsync(id,x=>x.Category,x=>x.Photos);
+                await _unitOfWork.ProductRepositry.DeleteAsync(product);
+                return Ok(new ResponseAPI(200, "Item has been deleted"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
