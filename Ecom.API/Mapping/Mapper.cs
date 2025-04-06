@@ -8,6 +8,7 @@ namespace Ecom.API.Mapping
     {
         public Mapper() { 
            
+            // Category
             CreateMap<CategoryDTO,Category>().ReverseMap();
             CreateMap<UpdateCategoryDTO,Category>().ReverseMap();
 

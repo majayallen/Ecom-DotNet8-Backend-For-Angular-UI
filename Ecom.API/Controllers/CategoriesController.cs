@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Ecom.API.Helper;
 using Ecom.Core.DTO;
 using Ecom.Core.Entites.Product;
 using Ecom.Core.Interfaces;
@@ -17,10 +18,9 @@ namespace Ecom.API.Controllers
         {
             try
             {
-
                 var category = await _unitOfWork.CategoryRepositry.GetAllAsync();
                 if (category == null)
-                    return BadRequest();
+                    return BadRequest(new ResponseAPI(400));
                 return Ok(category);
             }
             catch (Exception ex)
@@ -36,7 +36,7 @@ namespace Ecom.API.Controllers
             {
                 var category = await _unitOfWork.CategoryRepositry.GetByIdAsync(id);
                 if (category == null)
-                    return BadRequest();
+                    return BadRequest(new ResponseAPI(400));
                 return Ok(category);
             }
             catch (Exception ex)
@@ -52,10 +52,10 @@ namespace Ecom.API.Controllers
             {
                 var category = _mapper.Map<Category>(entity);
                 if (category == null)
-                    return BadRequest();
+                    return BadRequest(new ResponseAPI(400));
                 await _unitOfWork.CategoryRepositry.AddAsync(category);
 
-                return Ok(new {message="Item has been Added"});
+                return Ok(new ResponseAPI(200 , "Item has been Added"));
             }
             catch (Exception ex)
             {
@@ -70,10 +70,10 @@ namespace Ecom.API.Controllers
             {
                 var category = _mapper.Map<Category>(entity);
                 if (category == null)
-                    return BadRequest();
+                    return BadRequest(new ResponseAPI(400));
                 await _unitOfWork.CategoryRepositry.UpdateAsync(category);
 
-                return Ok(new { message = "Item has been Updated" });
+                return Ok(new ResponseAPI(200 , "Item has been Updated"));
             }
             catch (Exception ex)
             {
@@ -87,10 +87,10 @@ namespace Ecom.API.Controllers
             try
             {               
                 if (id <= 0)
-                    return BadRequest();
+                    return BadRequest(new ResponseAPI(400));
                 await _unitOfWork.CategoryRepositry.DeleteAsync(id);
 
-                return Ok(new { message = "Item has been deleted" });
+                return Ok(new ResponseAPI(200,"Item has been deleted"));
             }
             catch (Exception ex)
             {

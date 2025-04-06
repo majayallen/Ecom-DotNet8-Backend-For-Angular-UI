@@ -1,9 +1,10 @@
 using Ecom.Infrastructure;
+using Microsoft.Extensions.FileProviders;
 var builder = WebApplication.CreateBuilder(args);
+
 
 // Add services to the container.
 builder.Services.infrastructureConfiguration(builder.Configuration);
-
 
 
 builder.Services.AddControllers();
