@@ -22,6 +22,9 @@ namespace Ecom.Infrastructure.Repositries
             await _db.SaveChangesAsync();
         }
 
+        public async Task<int> CountAsync()
+         => await _db.Set<T>().CountAsync();
+
         public async Task DeleteAsync(int id)
         {
            var entity = await _db.Set<T>().FindAsync(id);

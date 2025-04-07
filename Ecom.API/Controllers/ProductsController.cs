@@ -3,6 +3,7 @@ using Ecom.API.Helper;
 using Ecom.Core.DTO;
 using Ecom.Core.Entites.Product;
 using Ecom.Core.Interfaces;
+using Ecom.Core.Sharing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,15 +16,13 @@ namespace Ecom.API.Controllers
         }
 
         [HttpGet("get-all")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery]ProductParams productParams)
         {
             try
             {
-                var product = await _unitOfWork.ProductRepositry.GetAllAsync(x=>x.Category,x=>x.Photos);
-               var result = _mapper.Map<List<ProductDTO>>(product);
-                if (product is null)
-                    return BadRequest(new ResponseAPI(400));
-                return Ok(result);
+                var product = await _unitOfWork.ProductRepositry.GetAllAsync(productParams);
+                var totalCount =await _unitOfWork.ProductRepositry.CountAsync();
+                return Ok(new Pagination<ProductDTO>(productParams.pageNumber, productParams.pageSize,totalCount,product));
             }
             catch (Exception ex)
             {

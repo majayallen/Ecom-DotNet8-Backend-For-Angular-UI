@@ -3,13 +3,10 @@ using Ecom.Core.DTO;
 using Ecom.Core.Entites.Product;
 using Ecom.Core.Interfaces;
 using Ecom.Core.Services;
+using Ecom.Core.Sharing;
 using Ecom.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ecom.Infrastructure.Repositries
 {
@@ -23,6 +20,43 @@ namespace Ecom.Infrastructure.Repositries
             _mapper = mapper;
             _db = db;
             _imageManagementService = imageManagementService;
+        }
+
+
+        public async Task<IEnumerable<ProductDTO>> GetAllAsync(ProductParams productParams)
+        {
+            var query = _db.Products.OrderBy(m => m.Name).Include(x => x.Category).Include(x => x.Photos)
+                .AsNoTracking();
+
+
+            if (!string.IsNullOrEmpty(productParams.Search))
+            {
+                var searchWord = productParams.Search.Split(' ');
+                query = query.Where(m => searchWord.All(woed =>
+                m.Name.ToLower().Contains(woed.ToLower()) ||
+                m.Description.ToLower().Contains(woed.ToLower())
+                ));
+            }
+
+            
+             if(productParams.categoryId.HasValue)
+                query = query.Where(x=>x.CategoryId == productParams.categoryId);
+
+            if (!string.IsNullOrEmpty(productParams.sort))
+            {
+                query = productParams.sort switch
+                {
+                    "PriceAce" => query.OrderBy(m => m.NewPrice),
+                    "PriceDce" => query.OrderByDescending(m => m.NewPrice),
+                    _ => query.OrderBy(m => m.Name),
+                };
+            }
+
+            query = query.Skip((productParams.pageSize) * (productParams.pageNumber - 1)).Take(productParams.pageSize);
+
+
+            var result = _mapper.Map<List<ProductDTO>>(query);
+            return result;
         }
 
         public async Task<bool> AddAsync(AddProductDTO productDTO)
