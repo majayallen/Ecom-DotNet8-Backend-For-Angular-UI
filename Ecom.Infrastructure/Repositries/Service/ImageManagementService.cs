@@ -19,27 +19,46 @@ namespace Ecom.Infrastructure.Repositries.Service
         public async Task<List<string>> AddImageAsync(IFormFileCollection files, string src)
         {
             List<string> SaveImageSrc = new List<string>();
-            var ImageDirctoty = Path.Combine("wwwroot", "Images", src);
-            if(Directory.Exists(ImageDirctoty) is not true)
+            var sanitizedSrc = src.Trim();
+            var ImageDirectory = Path.Combine("wwwroot", "Images", sanitizedSrc);
+
+            if (!Directory.Exists(ImageDirectory))
             {
-                Directory.CreateDirectory(ImageDirctoty);
+                Directory.CreateDirectory(ImageDirectory);
             }
 
             foreach (var item in files)
             {
-                if(item.Length > 0)
+                if (item.Length > 0)
                 {
-                    var ImageName = item.FileName;
-                    var ImageSrc = $"/Images/{src}/{ImageName}";
-                    var root = Path.Combine(ImageDirctoty, ImageName);
-                    using (FileStream stream = new FileStream(root, FileMode.Create)) { 
-                     
-                      await item.CopyToAsync(stream);
+                    try
+                    {
+                        var sanitizedFileName = SanitizeFileName(item.FileName);
+                        var uniqueFileName = $"{Guid.NewGuid()}_{sanitizedFileName}";
+
+                        var root = Path.Combine(ImageDirectory, uniqueFileName);
+                        var fullImagePath = $"/Images/{sanitizedSrc}/{uniqueFileName}";
+
+                        using (FileStream stream = new FileStream(root, FileMode.Create))
+                        {
+                            await item.CopyToAsync(stream);
+                        }
+
+                        SaveImageSrc.Add(fullImagePath);
                     }
-                    SaveImageSrc.Add(ImageName);
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error saving file: {ex.Message}");
+                    }
                 }
             }
+
             return SaveImageSrc;
+        }
+        private string SanitizeFileName(string fileName)
+        {
+            var invalidChars = Path.GetInvalidFileNameChars();
+            return string.Concat(fileName.Split(invalidChars)).Trim();
         }
 
         public void DeleteImageAsync(string src)
