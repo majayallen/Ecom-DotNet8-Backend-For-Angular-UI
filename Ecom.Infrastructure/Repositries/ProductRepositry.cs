@@ -23,7 +23,7 @@ namespace Ecom.Infrastructure.Repositries
         }
 
 
-        public async Task<IEnumerable<ProductDTO>> GetAllAsync(ProductParams productParams)
+        public async Task<ReturnProductDTO> GetAllAsync(ProductParams productParams)
         {
             var query = _db.Products.OrderBy(m => m.Name).Include(x => x.Category).Include(x => x.Photos)
                 .AsNoTracking();
@@ -52,11 +52,14 @@ namespace Ecom.Infrastructure.Repositries
                 };
             }
 
+            ReturnProductDTO returnProductDTO = new ReturnProductDTO();
+            returnProductDTO.TotalCount = query.Count();
+
             query = query.Skip((productParams.pageSize) * (productParams.pageNumber - 1)).Take(productParams.pageSize);
 
 
-            var result = _mapper.Map<List<ProductDTO>>(query);
-            return result;
+             returnProductDTO.Products = _mapper.Map<List<ProductDTO>>(query);
+            return returnProductDTO;
         }
 
         public async Task<bool> AddAsync(AddProductDTO productDTO)

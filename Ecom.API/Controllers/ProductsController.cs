@@ -21,12 +21,10 @@ namespace Ecom.API.Controllers
             try
             {
                 var product = await _unitOfWork.ProductRepositry.GetAllAsync(productParams);
-                var totalCount =await _unitOfWork.ProductRepositry.CountAsync();
-                return Ok(new Pagination<ProductDTO>(productParams.pageNumber, productParams.pageSize,totalCount,product));
+                return Ok(new Pagination<ProductDTO>(productParams.pageNumber, productParams.pageSize,product.TotalCount,product.Products));
             }
             catch (Exception ex)
             {
-
                 return BadRequest(ex.Message);
             }
         }
