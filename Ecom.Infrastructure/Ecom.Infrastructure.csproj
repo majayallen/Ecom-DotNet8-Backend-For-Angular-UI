@@ -16,7 +16,10 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.10" />
     <PackageReference Include="StackExchange.Redis" Version="2.8.31" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.9.0" />
   </ItemGroup>
 
   <ItemGroup>
